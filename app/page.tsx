@@ -6,11 +6,41 @@ import { useRef, useState } from 'react';
 export default function Home() {
   const [isAttending, setIsAttending] = useState<boolean>(true);
   const [guestCount, setGuestCount] = useState<1 | 2>(1);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const rsvpRef = useRef<HTMLElement>(null);
 
   function quickRsvp(attending: boolean) {
     setIsAttending(attending);
     rsvpRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formData,
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        setIsSubmitted(true);
+      } else {
+        setSubmitError('Something went wrong. Please try again.');
+      }
+    } catch {
+      setSubmitError('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -53,6 +83,7 @@ export default function Home() {
             <div>
               <h3 className="text-[11px] md:text-xs font-bold tracking-[0.15em] uppercase text-black/40 mb-2">When</h3>
               <p className="text-2xl md:text-3xl font-serif">Friday, October 2nd, 2026</p>
+              <p className="text-sm md:text-base text-black/60 mt-1">Arrival: 20:00.</p>
             </div>
 
             <div>
@@ -132,42 +163,24 @@ export default function Home() {
           Your presence is the greatest gift to us. For those who have kindly asked, should you wish to contribute towards the beginning of our life together, you may find our bank details below.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 w-full max-w-2xl">
             {/* Revolut Account */}
-            <div className="border border-black/10 p-6 md:p-8 bg-white">
-                <p className="text-[11px] md:text-xs font-bold tracking-[0.2em] uppercase text-black/40 mb-6 pb-4 border-b border-black/10">Revolut</p>
-                <div className="space-y-4 text-sm md:text-base text-left">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] md:text-[10px] text-black/50 uppercase tracking-widest font-bold">Beneficiary</span>
-                        <span className="font-mono tracking-tight text-xs md:text-sm">G MANSI KONTAXIS & A Koutsimpani</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] md:text-[10px] text-black/50 uppercase tracking-widest font-bold">IBAN</span>
-                        <span className="font-mono tracking-tight text-xs md:text-sm">LT64 3250 0666 9681 1305</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] md:text-[10px] text-black/50 uppercase tracking-widest font-bold">BIC / SWIFT</span>
-                        <span className="font-mono tracking-tight text-xs md:text-sm">REVOLT21</span>
-                    </div>
+            <div>
+                <p className="text-[11px] md:text-xs font-bold tracking-[0.2em] uppercase text-black/40 mb-4">Revolut</p>
+                <div className="space-y-2 text-xs md:text-sm text-black/80">
+                    <p>G Mansi Kontaxis & A Koutsimpani</p>
+                    <p>LT64 3250 0666 9681 1305</p>
+                    <p>REVOLT21</p>
                 </div>
             </div>
 
             {/* Eurobank Account */}
-            <div className="border border-black/10 p-6 md:p-8 bg-white">
-                <p className="text-[11px] md:text-xs font-bold tracking-[0.2em] uppercase text-black/40 mb-6 pb-4 border-b border-black/10">Eurobank</p>
-                <div className="space-y-4 text-sm md:text-base text-left">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] md:text-[10px] text-black/50 uppercase tracking-widest font-bold">Beneficiary</span>
-                        <span className="font-mono tracking-tight text-xs md:text-sm">KOUTSIMPANI ANNA-IRIS MANSI-KONTAXIS GEORGIOS</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] md:text-[10px] text-black/50 uppercase tracking-widest font-bold">IBAN</span>
-                        <span className="font-mono tracking-tight text-xs md:text-sm">GR3902606400000820200296865</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] md:text-[10px] text-black/50 uppercase tracking-widest font-bold">BIC / SWIFT</span>
-                        <span className="font-mono tracking-tight text-xs md:text-sm">ERBKGRAA</span>
-                    </div>
+            <div>
+                <p className="text-[11px] md:text-xs font-bold tracking-[0.2em] uppercase text-black/40 mb-4">Eurobank</p>
+                <div className="space-y-2 text-xs md:text-sm text-black/80">
+                    <p>Koutsimpani Anna-Iris, Mansi-Kontaxis Georgios</p>
+                    <p>GR39 0260 6400 0008 2020 0296 865</p>
+                    <p>ERBKGRAA</p>
                 </div>
             </div>
         </div>
@@ -196,8 +209,14 @@ export default function Home() {
         </div>
 
         <div className="p-8 md:p-16 lg:p-24 flex items-start lg:items-center">
-          <form action="https://api.web3forms.com/submit" method="POST" className="flex flex-col gap-8 text-sm md:text-base w-full max-w-xl mx-auto">
-            <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE" />
+          {isSubmitted ? (
+            <div className="w-full max-w-xl mx-auto text-center">
+              <p className="font-serif text-3xl md:text-4xl mb-3">Thank You.</p>
+              <p className="text-sm md:text-base text-black/70">Your RSVP has been received.</p>
+            </div>
+          ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-8 text-sm md:text-base w-full max-w-xl mx-auto">
+            <input type="hidden" name="access_key" value="ae2977c3-71b9-4f84-bdc9-075bc973ab98" />
             <input type="hidden" name="subject" value="New Wedding RSVP: Annie & George" />
 
             <input type="hidden" name="Attending" value={isAttending ? 'Yes' : 'No'} />
@@ -289,15 +308,21 @@ export default function Home() {
               ></textarea>
             </div>
 
+            {submitError && (
+              <p className="text-xs text-red-700">{submitError}</p>
+            )}
+
             <div className="mt-4">
               <button
                 type="submit"
-                className="w-full bg-[#1A1A1A] text-[#F9F9F7] text-[10px] font-bold uppercase tracking-[0.2em] py-5 hover:bg-black transition-colors rounded-none"
+                disabled={isSubmitting}
+                className="w-full bg-[#1A1A1A] text-[#F9F9F7] text-[10px] font-bold uppercase tracking-[0.2em] py-5 hover:bg-black transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Response
+                {isSubmitting ? 'Submitting…' : 'Submit Response'}
               </button>
             </div>
           </form>
+          )}
         </div>
       </section>
 
