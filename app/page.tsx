@@ -217,6 +217,7 @@ export default function Home() {
           ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-8 text-sm md:text-base w-full max-w-xl mx-auto">
             <input type="hidden" name="access_key" value="ae2977c3-71b9-4f84-bdc9-075bc973ab98" />
+            <input type="checkbox" name="botcheck" className="hidden" style={{ display: 'none' }} />
             <input type="hidden" name="subject" value="New Wedding RSVP: Annie & George" />
 
             <input type="hidden" name="Attending" value={isAttending ? 'Yes' : 'No'} />

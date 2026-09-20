@@ -19,16 +19,16 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Annie & George | October 2, 2026",
-  description: "Join Annie & George for a Friday evening in the garden — Anassa City Events, Goudi, Athens.",
+  title: "Annie & George",
+  description: "Join us in Athens on October 2nd, 2026.",
   robots: {
     index: false,
     follow: false,
-    nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-    },
+  },
+  openGraph: {
+    title: "Annie & George",
+    description: "Join us in Athens on October 2nd, 2026.",
+    type: "website",
   },
 };
 
